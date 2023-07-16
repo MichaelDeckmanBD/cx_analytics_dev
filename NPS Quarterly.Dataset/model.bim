@@ -93,27 +93,6 @@
                     }
                   }
                 ]
-              },
-              "pyxis_dim.department": {
-                "Definition": {
-                  "Binding": {
-                    "ConceptualEntity": "Pyxis Dim",
-                    "ConceptualProperty": "Department"
-                  }
-                },
-                "State": "Generated",
-                "Terms": [
-                  {
-                    "Department": {
-                      "Source": {
-                        "Agent": "PowerBI.VisualColumnRename",
-                        "Type": "External"
-                      },
-                      "State": "Suggested",
-                      "Weight": 0.9
-                    }
-                  }
-                ]
               }
             },
             "Language": "en-US",
@@ -234,20 +213,65 @@
           "    Replacer.ReplaceValue, ",
           "    {\"Department\", \"Designation\"}",
           "  ), ",
-          "  #\"Added Conditional Column\" = Table.AddColumn(",
+          "  AddedHealthSight = Table.AddColumn(",
           "    #\"Replaced Value\", ",
           "    \"HealthSight\", ",
           "    each if [HealthSightYN] = 1 then \"Yes\" else \"No\", ",
           "    type text",
           "  ), ",
-          "  #\"Added Conditional Column C2Safe\" = Table.AddColumn(",
-          "    #\"Added Conditional Column\", ",
+          "  AddedC2Safe = Table.AddColumn(",
+          "    AddedHealthSight, ",
           "    \"C2Safe\", ",
           "    each if [C2SafeYN] = 1 then \"Yes\" else \"No\", ",
           "    type text",
+          "  ), ",
+          "  AddedAlaris = Table.AddColumn(",
+          "    AddedC2Safe, ",
+          "    \"Alaris\", ",
+          "    each if [AlarisYN] = 1 then \"Yes\" else \"No\", ",
+          "    type text",
+          "  ), ",
+          "  #\"IDN Replaced Value\" = Table.ReplaceValue(",
+          "    AddedAlaris, ",
+          "    \"\", ",
+          "    \"No Value\", ",
+          "    Replacer.ReplaceValue, ",
+          "    {\"IDNArea\", \"IDNTerritory\", \"IDNBucket\"}",
+          "  ), ",
+          "  #\"Customer Type Replaced Value\" = Table.ReplaceValue(",
+          "    #\"IDN Replaced Value\", ",
+          "    \"\", ",
+          "    \"No Value\", ",
+          "    Replacer.ReplaceValue, ",
+          "    {\"CustomerType\"}",
+          "  ), ",
+          "  AddedLogistics = Table.AddColumn(",
+          "    #\"Customer Type Replaced Value\", ",
+          "    \"Logistics\", ",
+          "    each if [LogisticsYN] = 1 then \"Yes\" else \"No\", ",
+          "    type text",
+          "  ), ",
+          "  #\"Custommer Type Replaced Value\" = Table.ReplaceValue(",
+          "    AddedLogistics, ",
+          "    \"0\", ",
+          "    \"No Value\", ",
+          "    Replacer.ReplaceText, ",
+          "    {\"CustomerType\"}",
+          "  ), ",
+          "  AddedSupply = Table.AddColumn(",
+          "    #\"Customer Type Replaced Value\", ",
+          "    \"Supply\", ",
+          "    each if [SupplyYN] = 1 then \"Yes\" else \"No\", ",
+          "    type text",
+          "  ), ",
+          "  AddedAnesthesia = Table.AddColumn(",
+          "    AddedSupply, ",
+          "    \"Anesthesia\", ",
+          "    each if [AnesthesiaYN] = 1 then \"Yes\" else \"No\", ",
+          "    type text",
           "  )",
           "in",
-          "  #\"Added Conditional Column C2Safe\""
+          "  AddedAnesthesia"
         ],
         "kind": "m",
         "lineageTag": "a29ac96d-81f1-4778-8105-761d0445b3e3",
@@ -291,10 +315,64 @@
           "    \"ResponseUnique\", ",
           "    each [ResponseId] & Text.From([Response]), ",
           "    type text",
-          "  ),",
-          "    #\"Filtered Rows1\" = Table.SelectRows(AddedCustom, each [EndDate] > TrailingThreeYears)",
+          "  ), ",
+          "  #\"Filtered Rows1\" = Table.SelectRows(AddedCustom, each [EndDate] > TrailingThreeYears), ",
+          "  #\"Renamed Columns2\" = Table.RenameColumns(",
+          "    #\"Filtered Rows1\", ",
+          "    {{\"M2\", \"M2YN\"}, {\"InterOp\", \"InterOpYN\"}}",
+          "  ), ",
+          "  #\"Changed Type1\" = Table.TransformColumnTypes(",
+          "    #\"Renamed Columns2\", ",
+          "    {{\"InterOpYN\", Int64.Type}, {\"M2YN\", Int64.Type}}",
+          "  ), ",
+          "  AddInterop = Table.AddColumn(",
+          "    #\"Changed Type1\", ",
+          "    \"Interop\", ",
+          "    each if [InterOpYN] >= 1 then \"Yes\" else \"No\", ",
+          "    type text",
+          "  ), ",
+          "  AddM2 = Table.AddColumn(AddInterop, \"M2\", each if [M2YN] >= 1 then \"Yes\" else \"No\", type text), ",
+          "  AddedC2Safe = Table.AddColumn(",
+          "    AddM2, ",
+          "    \"C2Safe\", ",
+          "    each if [C2SafeYN] >= 1 then \"Yes\" else \"No\", ",
+          "    type text",
+          "  ), ",
+          "  #\"Replaced Value\" = Table.ReplaceValue(",
+          "    AddedC2Safe, ",
+          "    \"\", ",
+          "    \"0\", ",
+          "    Replacer.ReplaceValue, ",
+          "    {\"CustomerTenure\"}",
+          "  ), ",
+          "  #\"Replaced Value1\" = Table.ReplaceValue(",
+          "    #\"Replaced Value\", ",
+          "    \"Biomed\", ",
+          "    \"BioMed\", ",
+          "    Replacer.ReplaceText, ",
+          "    {\"Department\"}",
+          "  ), ",
+          "  #\"Filtered Rows2\" = Table.SelectRows(#\"Replaced Value1\", each true), ",
+          "  HealthSight = Table.AddColumn(",
+          "    #\"Filtered Rows2\", ",
+          "    \"HealthSight\", ",
+          "    each if [HealthSightYN] = 1 then \"Yes\" else \"No\", ",
+          "    type text",
+          "  ), ",
+          "  AddLogistics = Table.AddColumn(",
+          "    HealthSight, ",
+          "    \"Logistics\", ",
+          "    each if [LogisticsYN] = 1 then \"Yes\" else \"No\", ",
+          "    type text",
+          "  ), ",
+          "  AddSupply = Table.AddColumn(",
+          "    AddLogistics, ",
+          "    \"Supply\", ",
+          "    each if [SupplyYN] = 1 then \"Yes\" else \"No\", ",
+          "    type text",
+          "  )",
           "in",
-          "    #\"Filtered Rows1\""
+          "    AddSupply"
         ],
         "kind": "m",
         "lineageTag": "e752b72a-28d1-4373-aaff-40252050a911",
@@ -623,7 +701,7 @@
           "      \"ResponseId\"",
           "    }",
           "  ),",
-          "    #\"Removed Other Columns\" = Table.SelectColumns(#\"Reordered Columns\",{\"EndDate\", \"SFDCAccountNo\", \"SFDCAccountName\", \"SFDCAccountCity\", \"SFDCAccountState\", \"CustomerType\", \"ShipToNum\", \"ResponseId\", \"SurveyID\", \"Response\", \"ResponseUnique\"})",
+          "    #\"Removed Other Columns\" = Table.SelectColumns(#\"Reordered Columns\",{\"EndDate\", \"RecipientLastName\", \"RecipientFirstName\", \"RecipientEmail\", \"Q1NPSGroup\", \"Q1\", \"Q2\", \"Title\", \"SFDCAccountNo\", \"SFDCAccountName\", \"SFDCAccountCity\", \"SFDCAccountState\", \"SFDCPostalCode\", \"CustomerTenure\", \"CustomerType\", \"TerriLevel6Desc\", \"TerriLevel7Desc\", \"SFDCAccountCountry\", \"ShipToNum\", \"SurveySentDate\", \"Department\", \"Designation\", \"ResponseId\", \"SurveyID\", \"ResponseUnique\"})",
           "in",
           "    #\"Removed Other Columns\""
         ],
@@ -646,9 +724,10 @@
         "expression": [
           "let",
           "  Source = AlarisResponseStaging, ",
-          "  #\"Removed Other Columns\" = Table.SelectColumns(Source,{\"EndDate\", \"ResponseId\", \"SFDCAccountNo\", \"CustomerType\", \"SFDCAccountName\", \"SFDCAccountCity\", \"SFDCAccountState\", \"SFDCAccountCountry\", \"IDNArea\", \"IDNTerritory\", \"ShipToNum\", \"SurveyID\", \"Response\", \"ResponseUnique\"})",
+          "  #\"Removed Other Columns\" = Table.SelectColumns(Source,{\"EndDate\", \"ResponseId\", \"RecipientLastName\", \"RecipientFirstName\", \"RecipientEmail\", \"Q1NPSGroup\", \"Q1\", \"Q2Text\", \"Title\", \"SFDCAccountNo\", \"CustomerType\", \"SFDCAccountName\", \"SFDCAccountCity\", \"SFDCAccountState\", \"SFDCPostalCode\", \"SFDCAccountCountry\", \"IDNArea\", \"IDNTerritory\", \"IDNBucket\", \"ShipToNum\", \"Department\", \"Designation\", \"SurveyID\", \"Response\", \"ResponseUnique\"}),",
+          "    #\"Renamed Columns\" = Table.RenameColumns(#\"Removed Other Columns\",{{\"Q2Text\", \"Q2\"}})",
           "in",
-          "    #\"Removed Other Columns\""
+          "    #\"Renamed Columns\""
         ],
         "kind": "m",
         "lineageTag": "d4c5a9c2-0a94-4db4-827c-e92719b468bf",
@@ -809,20 +888,6 @@
         ],
         "columns": [
           {
-            "name": "AnesthesiaYN",
-            "annotations": [
-              {
-                "name": "SummarizationSetBy",
-                "value": "Automatic"
-              }
-            ],
-            "dataType": "int64",
-            "formatString": "0",
-            "lineageTag": "f8cb3a33-5cec-4222-85de-6946de00885c",
-            "sourceColumn": "AnesthesiaYN",
-            "summarizeBy": "sum"
-          },
-          {
             "name": "AreaName",
             "annotations": [
               {
@@ -836,18 +901,30 @@
             "summarizeBy": "none"
           },
           {
-            "name": "C2SafeYN",
+            "name": "C2Safe",
             "annotations": [
               {
                 "name": "SummarizationSetBy",
                 "value": "Automatic"
               }
             ],
-            "dataType": "int64",
-            "formatString": "0",
-            "lineageTag": "e3084545-982c-4edd-a9ab-1b593f33352c",
-            "sourceColumn": "C2SafeYN",
-            "summarizeBy": "sum"
+            "dataType": "string",
+            "lineageTag": "6210f1e0-785f-47be-8442-118cdeef5176",
+            "sourceColumn": "C2Safe",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "CSMFlag",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "lineageTag": "167061ac-3948-41c5-9227-c54024c2fa23",
+            "sourceColumn": "CSMFlag",
+            "summarizeBy": "none"
           },
           {
             "name": "CustomerSuccessManager",
@@ -960,32 +1037,82 @@
             "summarizeBy": "none"
           },
           {
-            "name": "HealthSightYN",
+            "name": "HealthSight",
             "annotations": [
               {
                 "name": "SummarizationSetBy",
                 "value": "Automatic"
               }
             ],
-            "dataType": "int64",
-            "formatString": "0",
-            "lineageTag": "6d8dbfac-cf4f-4c04-917d-7316b0f11014",
-            "sourceColumn": "HealthSightYN",
-            "summarizeBy": "sum"
+            "dataType": "string",
+            "lineageTag": "72a125f2-2677-4892-aa8e-68ab435765f6",
+            "sourceColumn": "HealthSight",
+            "summarizeBy": "none"
           },
           {
-            "name": "IVPrepYN",
+            "name": "IDNArea",
             "annotations": [
               {
                 "name": "SummarizationSetBy",
                 "value": "Automatic"
               }
             ],
-            "dataType": "int64",
-            "formatString": "0",
-            "lineageTag": "cf565956-4030-4618-87ad-cdaeaa846e73",
-            "sourceColumn": "IVPrepYN",
-            "summarizeBy": "sum"
+            "dataType": "string",
+            "lineageTag": "30c161fb-e750-47c4-8743-c2232c851cc0",
+            "sourceColumn": "IDNArea",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "IDNBucket",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "lineageTag": "26d0de4a-cdad-426f-89da-7a394641dcdb",
+            "sourceColumn": "IDNBucket",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "IDNNumFacilities",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "lineageTag": "f8dacf4b-5e9c-46c0-a63e-cee83638de6a",
+            "sourceColumn": "IDNNumFacilities",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "IDNNumStaffedBeds",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "lineageTag": "fc8fe261-f622-4b78-88bf-865a8a7c1ff5",
+            "sourceColumn": "IDNNumStaffedBeds",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "IDNTerritory",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "lineageTag": "4d17a6cf-04a9-487e-999f-79f8317f76ec",
+            "sourceColumn": "IDNTerritory",
+            "summarizeBy": "none"
           },
           {
             "name": "InfusionRegionalSalesDirector",
@@ -1014,7 +1141,7 @@
             "summarizeBy": "none"
           },
           {
-            "name": "InterOp",
+            "name": "Interop",
             "annotations": [
               {
                 "name": "SummarizationSetBy",
@@ -1022,12 +1149,12 @@
               }
             ],
             "dataType": "string",
-            "lineageTag": "5ee7297d-48b8-4f6c-97ad-cce56c792931",
-            "sourceColumn": "InterOp",
+            "lineageTag": "ac2baa47-5804-4a4f-84f9-e6cec966892e",
+            "sourceColumn": "Interop",
             "summarizeBy": "none"
           },
           {
-            "name": "InteropYN",
+            "name": "Logistics",
             "annotations": [
               {
                 "name": "SummarizationSetBy",
@@ -1035,23 +1162,9 @@
               }
             ],
             "dataType": "string",
-            "lineageTag": "01a38f31-266d-4941-a790-5efd5af673bd",
-            "sourceColumn": "InteropYN",
+            "lineageTag": "4c162a92-6ec2-48d2-9149-4ff53af49358",
+            "sourceColumn": "Logistics",
             "summarizeBy": "none"
-          },
-          {
-            "name": "LogisticsYN",
-            "annotations": [
-              {
-                "name": "SummarizationSetBy",
-                "value": "Automatic"
-              }
-            ],
-            "dataType": "int64",
-            "formatString": "0",
-            "lineageTag": "e0fd498c-bf1c-4179-9321-03644d404083",
-            "sourceColumn": "LogisticsYN",
-            "summarizeBy": "sum"
           },
           {
             "name": "M2",
@@ -1067,18 +1180,30 @@
             "summarizeBy": "none"
           },
           {
-            "name": "MedstationYN",
+            "name": "MasterIDNParent",
             "annotations": [
               {
                 "name": "SummarizationSetBy",
                 "value": "Automatic"
               }
             ],
-            "dataType": "int64",
-            "formatString": "0",
-            "lineageTag": "6ba648ba-80bc-4a7b-b6bc-73ca0498f27c",
-            "sourceColumn": "MedstationYN",
-            "summarizeBy": "sum"
+            "dataType": "string",
+            "lineageTag": "259da33a-db5a-4bd7-ab67-6d83a8be9d0c",
+            "sourceColumn": "MasterIDNParent",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "MasterIDNParentId",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "lineageTag": "f076b282-2da9-4101-83b1-763ac919032b",
+            "sourceColumn": "MasterIDNParentId",
+            "summarizeBy": "none"
           },
           {
             "name": "NPSAccountOwner",
@@ -1104,71 +1229,6 @@
             "dataType": "string",
             "lineageTag": "8df95395-2f0d-4691-b00d-6f7f49aa73bf",
             "sourceColumn": "Other_Products",
-            "summarizeBy": "none"
-          },
-          {
-            "name": "ProductMix",
-            "annotations": [
-              {
-                "name": "SummarizationSetBy",
-                "value": "Automatic"
-              }
-            ],
-            "dataType": "string",
-            "lineageTag": "b893a43b-db76-4027-b5ef-a9685e8f10bf",
-            "sourceColumn": "ProductMix",
-            "summarizeBy": "none"
-          },
-          {
-            "name": "ProductMixMedStn",
-            "annotations": [
-              {
-                "name": "SummarizationSetBy",
-                "value": "Automatic"
-              }
-            ],
-            "dataType": "string",
-            "lineageTag": "7d8c0327-6d10-4c09-b405-d56508e3d9b8",
-            "sourceColumn": "ProductMixMedStn",
-            "summarizeBy": "none"
-          },
-          {
-            "name": "ProductMixPAS",
-            "annotations": [
-              {
-                "name": "SummarizationSetBy",
-                "value": "Automatic"
-              }
-            ],
-            "dataType": "string",
-            "lineageTag": "45f5f5eb-9eb5-4d6e-9e88-ce6b6600fe52",
-            "sourceColumn": "ProductMixPAS",
-            "summarizeBy": "none"
-          },
-          {
-            "name": "Q1NPSGroup",
-            "annotations": [
-              {
-                "name": "SummarizationSetBy",
-                "value": "Automatic"
-              }
-            ],
-            "dataType": "string",
-            "lineageTag": "f0a60204-29c1-4e27-ba78-6dd043f32982",
-            "sourceColumn": "Q1NPSGroup",
-            "summarizeBy": "none"
-          },
-          {
-            "name": "Q2Text",
-            "annotations": [
-              {
-                "name": "SummarizationSetBy",
-                "value": "Automatic"
-              }
-            ],
-            "dataType": "string",
-            "lineageTag": "525a4657-f741-4a2f-b695-5b93768a68c9",
-            "sourceColumn": "Q2Text",
             "summarizeBy": "none"
           },
           {
@@ -1277,7 +1337,7 @@
             "summarizeBy": "none"
           },
           {
-            "name": "ShipToNum",
+            "name": "Supply",
             "annotations": [
               {
                 "name": "SummarizationSetBy",
@@ -1285,23 +1345,9 @@
               }
             ],
             "dataType": "string",
-            "lineageTag": "534c2ba7-670b-42cd-a687-2dfb9ad0d5a8",
-            "sourceColumn": "ShipToNum",
+            "lineageTag": "46462782-40a5-42a2-978e-08e432f6944e",
+            "sourceColumn": "Supply",
             "summarizeBy": "none"
-          },
-          {
-            "name": "SupplyYN",
-            "annotations": [
-              {
-                "name": "SummarizationSetBy",
-                "value": "Automatic"
-              }
-            ],
-            "dataType": "int64",
-            "formatString": "0",
-            "lineageTag": "1b2c35f7-813a-478e-9acf-ecd273083785",
-            "sourceColumn": "SupplyYN",
-            "summarizeBy": "sum"
           },
           {
             "name": "SurveyID",
@@ -1318,6 +1364,19 @@
             "summarizeBy": "count"
           },
           {
+            "name": "SurveySendDate",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "lineageTag": "e538323a-f63a-49a7-b035-13ef6a444681",
+            "sourceColumn": "SurveySendDate",
+            "summarizeBy": "none"
+          },
+          {
             "name": "TerrName",
             "annotations": [
               {
@@ -1328,19 +1387,6 @@
             "dataType": "string",
             "lineageTag": "2b598055-2077-4731-b67a-a8b096be5961",
             "sourceColumn": "TerrName",
-            "summarizeBy": "none"
-          },
-          {
-            "name": "Title",
-            "annotations": [
-              {
-                "name": "SummarizationSetBy",
-                "value": "Automatic"
-              }
-            ],
-            "dataType": "string",
-            "lineageTag": "34661d6f-4dad-44aa-9c17-130b99621a08",
-            "sourceColumn": "Title",
             "summarizeBy": "none"
           }
         ],
@@ -1353,59 +1399,10 @@
             "source": {
               "expression": [
                 "let",
-                "  Source = AlarisResponseStaging, ",
-                "  #\"Removed Other Columns\" = Table.SelectColumns(",
-                "    Source, ",
-                "    {",
-                "      \"EndDate\", ",
-                "      \"ResponseId\", ",
-                "      \"Q1NPSGroup\", ",
-                "      \"Q2Text\", ",
-                "      \"Title\", ",
-                "      \"CustomerType\", ",
-                "      \"Other_Products\", ",
-                "      \"CustomerTenure\", ",
-                "      \"AreaName\", ",
-                "      \"RegName\", ",
-                "      \"TerrName\", ",
-                "      \"InfusionSalesCnslt\", ",
-                "      \"RegionalSalesDirector_\", ",
-                "      \"SalesAVP\", ",
-                "      \"CustomerSuccessManager\", ",
-                "      \"NPSAccountOwner\", ",
-                "      \"RegionalProfServManager\", ",
-                "      \"RegionalProfServDirector\", ",
-                "      \"RegionalServiceDirector\", ",
-                "      \"RegionalServiceManager\", ",
-                "      \"InterOp\", ",
-                "      \"M2\", ",
-                "      \"ShipToNum\", ",
-                "      \"InfusionRegionalSalesDirector\", ",
-                "      \"CustomerTenureYrs\", ",
-                "      \"CustomerTenureBin\", ",
-                "      \"Department\", ",
-                "      \"Designation\", ",
-                "      \"ProductMix\", ",
-                "      \"ProductMixMedStn\", ",
-                "      \"ProductMixPAS\", ",
-                "      \"MedstationYN\", ",
-                "      \"C2SafeYN\", ",
-                "      \"AnesthesiaYN\", ",
-                "      \"HealthSightYN\", ",
-                "      \"LogisticsYN\", ",
-                "      \"IVPrepYN\", ",
-                "      \"SupplyYN\", ",
-                "      \"SurveyID\"",
-                "    }",
-                "  ), ",
-                "  #\"Added Conditional Column\" = Table.AddColumn(",
-                "    #\"Removed Other Columns\", ",
-                "    \"InteropYN\", ",
-                "    each if [InterOp] = \"1\" then \"Yes\" else \"No\" ,",
-                "    type text",
-                "  )",
+                "  Source = AlarisResponseStaging,",
+                "    #\"Removed Other Columns\" = Table.SelectColumns(Source,{\"EndDate\", \"ResponseId\", \"CustomerType\", \"MasterIDNParent\", \"MasterIDNParentId\", \"IDNArea\", \"IDNTerritory\", \"IDNBucket\", \"IDNNumFacilities\", \"IDNNumStaffedBeds\", \"Other_Products\", \"CustomerTenure\", \"AreaName\", \"RegName\", \"TerrName\", \"InfusionSalesCnslt\", \"RegionalSalesDirector_\", \"SalesAVP\", \"CustomerSuccessManager\", \"NPSAccountOwner\", \"RegionalProfServManager\", \"RegionalProfServDirector\", \"RegionalServiceDirector\", \"RegionalServiceManager\", \"CSMFlag\", \"SurveySendDate\", \"InfusionRegionalSalesDirector\", \"CustomerTenureYrs\", \"CustomerTenureBin\", \"Department\", \"Designation\", \"SurveyID\", \"Interop\", \"M2\", \"C2Safe\", \"HealthSight\", \"Logistics\", \"Supply\"})",
                 "in",
-                "  #\"Added Conditional Column\""
+                "    #\"Removed Other Columns\""
               ],
               "type": "m"
             }
@@ -1416,15 +1413,80 @@
         "name": "Customer Master",
         "annotations": [
           {
-            "name": "PBI_NavigationStepName",
-            "value": "Navigation"
-          },
-          {
             "name": "PBI_ResultType",
             "value": "Table"
+          },
+          {
+            "name": "PBI_NavigationStepName",
+            "value": "Navigation"
           }
         ],
         "columns": [
+          {
+            "name": "ActiveISMS",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "lineageTag": "a400559d-d826-437c-b4bc-4e48dab060fa",
+            "sourceColumn": "ActiveISMS",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "ActiveSWMaintenance",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "lineageTag": "ede3a0f2-8c61-4e88-90bf-9c43bb26ef3b",
+            "sourceColumn": "ActiveSWMaintenance",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "City",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "lineageTag": "6907598b-81eb-4b2c-9e20-d8e0d65f6bd5",
+            "sourceColumn": "City",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "CleanCustomerSWV",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "lineageTag": "b0c57728-e450-43a4-9d82-03c38e51846a",
+            "sourceColumn": "CleanCustomerSWV",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "County",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "lineageTag": "1f02fa26-7d72-4296-85c7-80bdda0f389b",
+            "sourceColumn": "County",
+            "summarizeBy": "none"
+          },
           {
             "name": "CustomerIdNoLeadingZero",
             "annotations": [
@@ -1437,6 +1499,19 @@
             "isKey": true,
             "lineageTag": "4a7f0b0d-cb0c-4a53-9c09-f419c1571200",
             "sourceColumn": "CustomerIdNoLeadingZero",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "CustomerSWVersion_Infusion",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "lineageTag": "9c6ac90d-1731-41f6-99eb-8119ec136623",
+            "sourceColumn": "CustomerSWVersion_Infusion",
             "summarizeBy": "none"
           },
           {
@@ -1557,6 +1632,222 @@
             "summarizeBy": "none"
           },
           {
+            "name": "FSMManagerFullNameDispensingLevel2",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "lineageTag": "5194d263-bdce-4ae1-9063-6c3940ee1dac",
+            "sourceColumn": "FSMManagerFullNameDispensingLevel2",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "FSMManagerFullNameDispensingLevel3",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "lineageTag": "04066c08-2bba-4863-a7e9-a52145e46409",
+            "sourceColumn": "FSMManagerFullNameDispensingLevel3",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "FSMName",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "lineageTag": "e7b23986-89ea-4b5d-a062-cfda6c38c22d",
+            "sourceColumn": "FSMName",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "InfusionAreaName",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "lineageTag": "5db4b48b-ab79-4aed-a934-a5552da06567",
+            "sourceColumn": "InfusionAreaName",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "InfusionRegionName",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "lineageTag": "3bb1b2fc-e47c-4ef8-a8fc-6c8e244432be",
+            "sourceColumn": "InfusionRegionName",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "InfusionTerritoryName",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "lineageTag": "d34d5f2b-5789-4b1b-968f-c68817bf46cf",
+            "sourceColumn": "InfusionTerritoryName",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "InfusionTerritoryRepName",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "lineageTag": "fdbf095e-bc49-4d4a-8c56-f97f84aaedc4",
+            "sourceColumn": "InfusionTerritoryRepName",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "LatestServerSWVersion",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "lineageTag": "e6ce1600-ee96-450b-b94b-e311d2e74421",
+            "sourceColumn": "LatestServerSWVersion",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "Latitude",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              },
+              {
+                "name": "PBI_FormatHint",
+                "value": "{\"isGeneralNumber\":true}"
+              }
+            ],
+            "dataType": "double",
+            "lineageTag": "2c388e79-8019-4dc1-9e67-eca36e33f7d7",
+            "sourceColumn": "Latitude",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "Longitude",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              },
+              {
+                "name": "PBI_FormatHint",
+                "value": "{\"isGeneralNumber\":true}"
+              }
+            ],
+            "dataType": "double",
+            "lineageTag": "161240a3-045e-46bb-b5cf-7c0634b85d83",
+            "sourceColumn": "Longitude",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "Name",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "lineageTag": "799a063e-3052-417b-9301-a29dde6c456b",
+            "sourceColumn": "Name",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "RSSIVPrepServerSWVersion_Max",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "lineageTag": "0ad374e4-3dbd-4d0c-9d3d-b28c0bf34f28",
+            "sourceColumn": "RSSIVPrepServerSWVersion_Max",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "RSSLogisticsServerSWVersion_Max",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "lineageTag": "e94398a6-9f15-441c-b226-583bbfcfd185",
+            "sourceColumn": "RSSLogisticsServerSWVersion_Max",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "RSSMedESDeviceSWVersion_Max",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "lineageTag": "70019b14-ea41-45f5-b97b-ce7b2f74bfbc",
+            "sourceColumn": "RSSMedESDeviceSWVersion_Max",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "RSSMedESServerSWVersion_Max",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "lineageTag": "e0a3b9bc-603b-4919-a13a-2a2959e9ac38",
+            "sourceColumn": "RSSMedESServerSWVersion_Max",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "ServerCustomer",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "lineageTag": "596c5f2e-6238-4d7e-a402-bce9f35d3607",
+            "sourceColumn": "ServerCustomer",
+            "summarizeBy": "none"
+          },
+          {
             "name": "State",
             "annotations": [
               {
@@ -1567,6 +1858,60 @@
             "dataType": "string",
             "lineageTag": "534aac6f-b0e9-472b-98c8-e99297e1a586",
             "sourceColumn": "State",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "WithAlarisPCU",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "lineageTag": "7b864130-84c2-4c15-9097-e2f55da5426b",
+            "sourceColumn": "WithAlarisPCU",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "ZSC3ContractEndDate",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "dateTime",
+            "formatString": "General Date",
+            "lineageTag": "2c5b3fe2-a304-4d60-b8f9-dc86b3a333fa",
+            "sourceColumn": "ZSC3ContractEndDate",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "ZSC3ContractStartDate",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "dateTime",
+            "formatString": "General Date",
+            "lineageTag": "326d4399-a93f-493c-8e1e-4c334fa9b299",
+            "sourceColumn": "ZSC3ContractStartDate",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "ZipCode",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "lineageTag": "63677591-3330-4bb6-aeb9-f271d4efde74",
+            "sourceColumn": "ZipCode",
             "summarizeBy": "none"
           }
         ],
@@ -1627,8 +1972,7 @@
                 "      {\"EnterpriseAccountNetworkParentName\", type text}",
                 "    }",
                 "  ), ",
-                "  #\"Filtered Rows\" = Table.SelectRows(#\"Changed Type\", each ([EnterpriseAccountNumber] <> \"\")), ",
-                "  #\"Removed Other Columns\" = Table.SelectColumns(#\"Filtered Rows\",{\"Customer_ID\", \"CustomerIdNoLeadingZero\", \"State\", \"EnterpriseAccountNumberSFID\", \"EnterpriseAccountName\", \"EnterpriseAccountNetwork\", \"EnterpriseAccountNetworkName\", \"EnterpriseAccountNetworkParent\", \"EnterpriseAccountNetworkParentName\", \"EnterpriseAccountNumber\", \"CustomerSegment\"}), ",
+                "  #\"Removed Other Columns\" = Table.SelectColumns(#\"Changed Type\",{\"Customer_ID\", \"CustomerIdNoLeadingZero\", \"Name\", \"City\", \"County\", \"ZipCode\", \"State\", \"Longitude\", \"Latitude\", \"CustomerSWVersion_Infusion\", \"InfusionTerritoryRepName\", \"InfusionTerritoryName\", \"InfusionAreaName\", \"InfusionRegionName\", \"EnterpriseAccountNumberSFID\", \"EnterpriseAccountName\", \"EnterpriseAccountNetwork\", \"EnterpriseAccountNetworkName\", \"EnterpriseAccountNetworkParent\", \"EnterpriseAccountNetworkParentName\", \"EnterpriseAccountNumber\", \"WithAlarisPCU\", \"ServerCustomer\", \"LatestServerSWVersion\", \"ActiveSWMaintenance\", \"ZSC3ContractStartDate\", \"ZSC3ContractEndDate\", \"ActiveISMS\", \"FSMName\", \"RSSMedESServerSWVersion_Max\", \"RSSMedESDeviceSWVersion_Max\", \"RSSIVPrepServerSWVersion_Max\", \"RSSLogisticsServerSWVersion_Max\", \"CustomerSegment\", \"FSMManagerFullNameDispensingLevel2\", \"FSMManagerFullNameDispensingLevel3\", \"CleanCustomerSWV\"}), ",
                 "  #\"Renamed Columns\" = Table.RenameColumns(",
                 "    #\"Removed Other Columns\", ",
                 "    {",
@@ -1640,9 +1984,10 @@
                 "      {\"EnterpriseAccountNetworkParent\", \"Enterprise Account Network Parent\"}, ",
                 "      {\"EnterpriseAccountNetworkParentName\", \"Enterprise Account Network Parent Name\"}",
                 "    }",
-                "  )",
+                "  ),",
+                "    #\"Changed Type1\" = Table.TransformColumnTypes(#\"Renamed Columns\",{{\"Longitude\", type number}, {\"Latitude\", type number}})",
                 "in",
-                "  #\"Renamed Columns\""
+                "  #\"Changed Type1\""
               ],
               "type": "m"
             }
@@ -2232,15 +2577,28 @@
         "name": "NPS Dim",
         "annotations": [
           {
-            "name": "PBI_NavigationStepName",
-            "value": "Navigation"
-          },
-          {
             "name": "PBI_ResultType",
             "value": "Table"
+          },
+          {
+            "name": "PBI_NavigationStepName",
+            "value": "Navigation"
           }
         ],
         "columns": [
+          {
+            "name": "CustomerTenure",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "lineageTag": "f4661463-88aa-4269-8923-759dfd6a4c31",
+            "sourceColumn": "CustomerTenure",
+            "summarizeBy": "none"
+          },
           {
             "name": "CustomerType",
             "annotations": [
@@ -2252,6 +2610,32 @@
             "dataType": "string",
             "lineageTag": "24ad0c77-403e-4116-9624-79e17e294ac9",
             "sourceColumn": "CustomerType",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "Department",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "lineageTag": "cc4a6f47-d840-47d5-9302-dc41a3a6e6bf",
+            "sourceColumn": "Department",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "Designation",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "lineageTag": "73d5fc91-6d95-480a-a68d-27b9819b1416",
+            "sourceColumn": "Designation",
             "summarizeBy": "none"
           },
           {
@@ -2286,6 +2670,19 @@
             "summarizeBy": "none"
           },
           {
+            "name": "IDNBucket",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "lineageTag": "cbc94439-1dca-40ea-950f-1bdc76e6166a",
+            "sourceColumn": "IDNBucket",
+            "summarizeBy": "none"
+          },
+          {
             "name": "IDNTerritory",
             "annotations": [
               {
@@ -2296,6 +2693,85 @@
             "dataType": "string",
             "lineageTag": "2635a055-45ec-4f4a-b3cc-33b86d0d15cb",
             "sourceColumn": "IDNTerritory",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "Q1",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "int64",
+            "formatString": "0",
+            "lineageTag": "453049bb-3de3-44a5-ba88-a6ce8bc995f9",
+            "sourceColumn": "Q1",
+            "summarizeBy": "sum"
+          },
+          {
+            "name": "Q1NPSGroup",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "lineageTag": "be98b494-b8c5-42c0-9a4e-f44d23a753ac",
+            "sourceColumn": "Q1NPSGroup",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "Q2",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "lineageTag": "ae97ce6a-64d5-4e82-a256-099fabdb1df9",
+            "sourceColumn": "Q2",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "RecipientEmail",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "lineageTag": "45725fc1-5b31-4a2a-9b51-b4686dcbae2e",
+            "sourceColumn": "RecipientEmail",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "RecipientFirstName",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "lineageTag": "a40b283a-bab2-4688-a567-40ae99df0418",
+            "sourceColumn": "RecipientFirstName",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "RecipientLastName",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "lineageTag": "6fa81cdb-b13c-4c8e-9c4c-f996276aabab",
+            "sourceColumn": "RecipientLastName",
             "summarizeBy": "none"
           },
           {
@@ -2405,6 +2881,19 @@
             "summarizeBy": "none"
           },
           {
+            "name": "SFDCPostalCode",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "lineageTag": "9f0ded6c-9c09-459a-8aa4-5075495189e2",
+            "sourceColumn": "SFDCPostalCode",
+            "summarizeBy": "none"
+          },
+          {
             "name": "ShipToNum",
             "annotations": [
               {
@@ -2430,6 +2919,58 @@
             "lineageTag": "866d2cd0-00f0-4710-85b1-31ec2ebf154b",
             "sourceColumn": "SurveyID",
             "summarizeBy": "count"
+          },
+          {
+            "name": "SurveySentDate",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "lineageTag": "4ee29000-e216-4997-9117-021785c01cb4",
+            "sourceColumn": "SurveySentDate",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "TerriLevel6Desc",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "lineageTag": "2188bd40-511f-41bc-8709-fe3238c622f7",
+            "sourceColumn": "TerriLevel6Desc",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "TerriLevel7Desc",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "lineageTag": "ba34a2db-151f-4dd1-b604-94717e783cec",
+            "sourceColumn": "TerriLevel7Desc",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "Title",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "lineageTag": "89162a85-64c3-4147-b819-5f201ce1d19c",
+            "sourceColumn": "Title",
+            "summarizeBy": "none"
           }
         ],
         "lineageTag": "4fa75d73-13ed-41e8-b017-262594947edd",
@@ -2605,32 +3146,30 @@
         ],
         "columns": [
           {
-            "name": "AlarisYN",
+            "name": "Alaris",
             "annotations": [
               {
                 "name": "SummarizationSetBy",
                 "value": "Automatic"
               }
             ],
-            "dataType": "int64",
-            "formatString": "0",
-            "lineageTag": "171d6cbe-0155-4109-a601-3fb8cb6a641b",
-            "sourceColumn": "AlarisYN",
-            "summarizeBy": "sum"
+            "dataType": "string",
+            "lineageTag": "3acc6610-9b82-49eb-a90c-3e0b0330a8b7",
+            "sourceColumn": "Alaris",
+            "summarizeBy": "none"
           },
           {
-            "name": "AnesthesiaYN",
+            "name": "Anesthesia",
             "annotations": [
               {
                 "name": "SummarizationSetBy",
                 "value": "Automatic"
               }
             ],
-            "dataType": "int64",
-            "formatString": "0",
-            "lineageTag": "f0825160-2b59-4733-bb0f-e27e0e45650b",
-            "sourceColumn": "AnesthesiaYN",
-            "summarizeBy": "sum"
+            "dataType": "string",
+            "lineageTag": "56f2c227-5f26-4c47-9378-d0cfa472ccdf",
+            "sourceColumn": "Anesthesia",
+            "summarizeBy": "none"
           },
           {
             "name": "C2Safe",
@@ -2644,20 +3183,6 @@
             "lineageTag": "2703ef29-14e9-4649-9864-759ea2c6ba2a",
             "sourceColumn": "C2Safe",
             "summarizeBy": "none"
-          },
-          {
-            "name": "C2SafeYN",
-            "annotations": [
-              {
-                "name": "SummarizationSetBy",
-                "value": "Automatic"
-              }
-            ],
-            "dataType": "int64",
-            "formatString": "0",
-            "lineageTag": "78451fdd-b004-4a88-a529-fa417b7a6cb9",
-            "sourceColumn": "C2SafeYN",
-            "summarizeBy": "sum"
           },
           {
             "name": "CustomerSuccessManager",
@@ -2722,32 +3247,6 @@
             "dataType": "string",
             "lineageTag": "0e2fb563-3bf4-4a2e-b0ce-bc5667ae1783",
             "sourceColumn": "CustomerType",
-            "summarizeBy": "none"
-          },
-          {
-            "name": "Department",
-            "annotations": [
-              {
-                "name": "SummarizationSetBy",
-                "value": "Automatic"
-              }
-            ],
-            "dataType": "string",
-            "lineageTag": "d51a652a-5463-4459-b5c6-459f3acdcc6e",
-            "sourceColumn": "Department",
-            "summarizeBy": "none"
-          },
-          {
-            "name": "Designation",
-            "annotations": [
-              {
-                "name": "SummarizationSetBy",
-                "value": "Automatic"
-              }
-            ],
-            "dataType": "string",
-            "lineageTag": "03d353d5-899a-445e-878c-f0787e96c067",
-            "sourceColumn": "Designation",
             "summarizeBy": "none"
           },
           {
@@ -2861,7 +3360,33 @@
             "summarizeBy": "none"
           },
           {
-            "name": "HealthSightYN",
+            "name": "IDNArea",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "lineageTag": "7cbd35bb-7211-4b13-9725-ab36728de3ed",
+            "sourceColumn": "IDNArea",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "IDNBucket",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "lineageTag": "e31068b3-945a-43cc-8eca-dfcc916827f6",
+            "sourceColumn": "IDNBucket",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "IDNNumFacilities",
             "annotations": [
               {
                 "name": "SummarizationSetBy",
@@ -2870,12 +3395,12 @@
             ],
             "dataType": "int64",
             "formatString": "0",
-            "lineageTag": "1c955b2b-fbff-4f38-8d99-65f6030deb21",
-            "sourceColumn": "HealthSightYN",
+            "lineageTag": "a7c7ccdb-678f-4ca4-9414-6178e965cf46",
+            "sourceColumn": "IDNNumFacilities",
             "summarizeBy": "sum"
           },
           {
-            "name": "IVPrepYN",
+            "name": "IDNNumStaffedBeds",
             "annotations": [
               {
                 "name": "SummarizationSetBy",
@@ -2884,23 +3409,22 @@
             ],
             "dataType": "int64",
             "formatString": "0",
-            "lineageTag": "353d2024-348f-49e2-94c2-40a4076de71a",
-            "sourceColumn": "IVPrepYN",
+            "lineageTag": "32f60490-c52c-4993-826d-febdb384ef42",
+            "sourceColumn": "IDNNumStaffedBeds",
             "summarizeBy": "sum"
           },
           {
-            "name": "LogisticsYN",
+            "name": "IDNTerritory",
             "annotations": [
               {
                 "name": "SummarizationSetBy",
                 "value": "Automatic"
               }
             ],
-            "dataType": "int64",
-            "formatString": "0",
-            "lineageTag": "619c5af2-67a3-4d7c-ac59-0863e6fbcea5",
-            "sourceColumn": "LogisticsYN",
-            "summarizeBy": "sum"
+            "dataType": "string",
+            "lineageTag": "735ba519-eb67-4526-a8d5-b7e8175a8b33",
+            "sourceColumn": "IDNTerritory",
+            "summarizeBy": "none"
           },
           {
             "name": "MedSalesCnslt",
@@ -2942,6 +3466,19 @@
             "summarizeBy": "none"
           },
           {
+            "name": "ProductMix",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "lineageTag": "67b88f4d-9277-46f6-8e2b-0d9cc8f51f0c",
+            "sourceColumn": "ProductMix",
+            "summarizeBy": "none"
+          },
+          {
             "name": "ProductMixMedStn",
             "annotations": [
               {
@@ -2965,32 +3502,6 @@
             "dataType": "string",
             "lineageTag": "b9c53344-f4ce-468e-9d30-9b734570b2ed",
             "sourceColumn": "ProductMixPAS",
-            "summarizeBy": "none"
-          },
-          {
-            "name": "Q1NPSGroup",
-            "annotations": [
-              {
-                "name": "SummarizationSetBy",
-                "value": "Automatic"
-              }
-            ],
-            "dataType": "string",
-            "lineageTag": "2fe3b42f-bc02-4f58-9286-8648d33f4a5f",
-            "sourceColumn": "Q1NPSGroup",
-            "summarizeBy": "none"
-          },
-          {
-            "name": "Q2",
-            "annotations": [
-              {
-                "name": "SummarizationSetBy",
-                "value": "Automatic"
-              }
-            ],
-            "dataType": "string",
-            "lineageTag": "dd73bd6c-cceb-465a-8a9e-8181ba449fe3",
-            "sourceColumn": "Q2",
             "summarizeBy": "none"
           },
           {
@@ -3073,7 +3584,20 @@
             "summarizeBy": "none"
           },
           {
-            "name": "SupplyYN",
+            "name": "Supply",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "lineageTag": "9b1c0851-60a4-427f-8487-3b8563d97ca4",
+            "sourceColumn": "Supply",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "SurveyID",
             "annotations": [
               {
                 "name": "SummarizationSetBy",
@@ -3082,9 +3606,9 @@
             ],
             "dataType": "int64",
             "formatString": "0",
-            "lineageTag": "b8dab3b2-2dfe-468e-8783-c8c905c72a0c",
-            "sourceColumn": "SupplyYN",
-            "summarizeBy": "sum"
+            "lineageTag": "522c6839-589a-46c4-b9df-dd93bc3407bc",
+            "sourceColumn": "SurveyID",
+            "summarizeBy": "count"
           },
           {
             "name": "TerriLevel5Desc",
@@ -3124,19 +3648,6 @@
             "lineageTag": "118beba6-3635-4dbe-90d4-8278ebcf0bb2",
             "sourceColumn": "TerriLevel7Desc",
             "summarizeBy": "none"
-          },
-          {
-            "name": "Title",
-            "annotations": [
-              {
-                "name": "SummarizationSetBy",
-                "value": "Automatic"
-              }
-            ],
-            "dataType": "string",
-            "lineageTag": "d400f9e4-ed9e-46c1-97eb-677246ff0399",
-            "sourceColumn": "Title",
-            "summarizeBy": "none"
           }
         ],
         "lineageTag": "a8b81fa7-57e1-421f-8699-4345c2a8d885",
@@ -3149,7 +3660,7 @@
               "expression": [
                 "let",
                 "    Source = PyxisResponseStaging,",
-                "    #\"Removed Other Columns\" = Table.SelectColumns(Source,{\"EndDate\", \"ResponseId\", \"Q1NPSGroup\", \"Q2\", \"Title\", \"CustomerTenure\", \"CustomerType\", \"TerriLevel5Desc\", \"TerriLevel6Desc\", \"TerriLevel7Desc\", \"MedSalesCnslt\", \"CustomerSuccessManager\", \"NPSAccountOwner\", \"RegionalServiceDirector\", \"RegionalProfServDirector\", \"SFDCAccountCountry\", \"ESVersion\", \"SalesAVP\", \"RegionalSalesDirector\", \"OtherProducts\", \"CustomerTenureYrs\", \"CustomerTenureBin\", \"Department\", \"Designation\", \"ProductMixMedStn\", \"ProductMixPAS\", \"AlarisYN\", \"C2SafeYN\", \"AnesthesiaYN\", \"HealthSightYN\", \"LogisticsYN\", \"IVPrepYN\", \"SupplyYN\", \"HealthSight\", \"C2Safe\"})",
+                "    #\"Removed Other Columns\" = Table.SelectColumns(Source,{\"EndDate\", \"ResponseId\", \"IDNArea\", \"IDNTerritory\", \"IDNBucket\", \"IDNNumFacilities\", \"IDNNumStaffedBeds\", \"CustomerTenure\", \"CustomerType\", \"TerriLevel5Desc\", \"TerriLevel6Desc\", \"TerriLevel7Desc\", \"MedSalesCnslt\", \"CustomerSuccessManager\", \"NPSAccountOwner\", \"RegionalServiceDirector\", \"RegionalProfServDirector\", \"SFDCAccountCountry\", \"ESVersion\", \"SalesAVP\", \"RegionalSalesDirector\", \"OtherProducts\", \"CustomerTenureYrs\", \"CustomerTenureBin\", \"ProductMix\", \"ProductMixMedStn\", \"ProductMixPAS\", \"SurveyID\", \"HealthSight\", \"C2Safe\", \"Alaris\", \"Supply\", \"Anesthesia\"})",
                 "in",
                 "    #\"Removed Other Columns\""
               ],
@@ -3163,7 +3674,7 @@
         "annotations": [
           {
             "name": "PBI_Id",
-            "value": "542d4414c7e14b0bab48bad405b37c03"
+            "value": "d1f28a7ff5234e929b737911a6117eee"
           }
         ],
         "columns": [
@@ -3178,7 +3689,7 @@
             "dataType": "string",
             "isDataTypeInferred": true,
             "isNameInferred": false,
-            "lineageTag": "61b777e5-9a4d-44f0-bf14-895dccf92eba",
+            "lineageTag": "43ef1e14-0dff-4f72-9789-094f38d9d8a3",
             "relatedColumnDetails": {
               "groupByColumns": [
                 {
@@ -3213,7 +3724,7 @@
             "isDataTypeInferred": true,
             "isHidden": true,
             "isNameInferred": false,
-            "lineageTag": "1f6d02c9-5133-431f-bd91-8c77cf957a57",
+            "lineageTag": "87745bd1-f9b3-4f4d-aaba-fb3d873f8e8c",
             "sortByColumn": "Pyxis Field Parameter Order",
             "sourceColumn": "[Value2]",
             "summarizeBy": "none",
@@ -3232,29 +3743,30 @@
             "isDataTypeInferred": true,
             "isHidden": true,
             "isNameInferred": false,
-            "lineageTag": "d82b8903-2baa-4987-ab1b-6a64aff80231",
+            "lineageTag": "a2bff0ba-fdfb-4a25-83a3-fdc01140f137",
             "sourceColumn": "[Value3]",
             "summarizeBy": "sum",
             "type": "calculatedTableColumn"
           }
         ],
-        "lineageTag": "286f43ce-3e93-4ced-a997-6fd2dfb05051",
+        "lineageTag": "2caef6cb-cbf3-4163-b978-d303dc53c4ed",
         "partitions": [
           {
-            "name": "Pyxis Field Parameter-57986fa0-c12e-422b-8024-67106c20e7a6",
+            "name": "Pyxis Field Parameter-8dfde1b4-5d2e-41b4-ab82-76697fda188d",
             "mode": "import",
             "source": {
               "expression": [
                 "{",
-                "    (\"Department\", NAMEOF('Pyxis Dim'[Department]), 0),",
-                "    (\"Designation\", NAMEOF('Pyxis Dim'[Designation]), 1),",
-                "    (\"ESVersion\", NAMEOF('Pyxis Dim'[ESVersion (groups)]), 2),",
-                "    (\"C2SafeYN\", NAMEOF('Pyxis Dim'[C2Safe]), 3),",
-                "    (\"AnesthesiaYN\", NAMEOF('Pyxis Dim'[AnesthesiaYN]), 4),",
-                "    (\"AlarisYN\", NAMEOF('Pyxis Dim'[AlarisYN]), 5),",
-                "    (\"IDNArea\", NAMEOF('Pyxis Dim'[IDNArea]), 6),",
-                "    (\"IDNBucket\", NAMEOF('Pyxis Dim'[IDNBucket]), 7),",
-                "    (\"IDNTerritory\", NAMEOF('Pyxis Dim'[IDNTerritory]), 8)",
+                "    (\"Alaris\", NAMEOF('Pyxis Dim'[Alaris]), 0),",
+                "    (\"Anesthesia\", NAMEOF('Pyxis Dim'[Anesthesia]), 1),",
+                "    (\"C2Safe\", NAMEOF('Pyxis Dim'[C2Safe]), 2),",
+                "    (\"HealthSight\", NAMEOF('Pyxis Dim'[HealthSight]), 3),",
+                "    (\"Supply\", NAMEOF('Pyxis Dim'[Supply]), 4),",
+                "    (\"CustomerTenureBin\", NAMEOF('Pyxis Dim'[CustomerTenureBin]), 5),",
+                "    (\"CustomerType\", NAMEOF('Pyxis Dim'[CustomerType]), 6),",
+                "    (\"ESVersion (groups)\", NAMEOF('Pyxis Dim'[ESVersion (groups)]), 7),",
+                "    (\"TerriLevel5Desc\", NAMEOF('Pyxis Dim'[TerriLevel5Desc]), 8),",
+                "    (\"TerriLevel6Desc\", NAMEOF('Pyxis Dim'[TerriLevel6Desc]), 9)",
                 "}"
               ],
               "type": "calculated"
