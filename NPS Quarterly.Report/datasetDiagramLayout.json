@@ -10,8 +10,8 @@
       "nodes": [
         {
           "location": {
-            "x": 911.562290524375,
-            "y": 71.07985903522659
+            "x": 873.769424285052,
+            "y": 69.436690937864711
           },
           "nodeIndex": "Date",
           "nodeLineageTag": "db6db2fa-85f0-42ad-93f7-61416478b538",
@@ -24,8 +24,8 @@
         },
         {
           "location": {
-            "x": 1307.3215255686819,
-            "y": 199.61487097100786
+            "x": 1179.1544139744558,
+            "y": 189.75586238683664
           },
           "nodeIndex": "VOC Follow Up",
           "nodeLineageTag": "3a2d78e1-3d8c-4a53-b17e-6da7a4ce0cc8",
@@ -51,8 +51,8 @@
         },
         {
           "location": {
-            "x": 1314.1919193695353,
-            "y": 78.270669149735411
+            "x": 1177.8089672885,
+            "y": 65.125324370840431
           },
           "nodeIndex": "Customer Master",
           "nodeLineageTag": "46da24b8-0667-4f96-9dd9-05876df8bf1f",
@@ -65,8 +65,8 @@
         },
         {
           "location": {
-            "x": 1055.4932145025823,
-            "y": 396.30726111119986
+            "x": 970.04847343976485,
+            "y": 406.16626969537106
           },
           "nodeIndex": "NPS Fact",
           "nodeLineageTag": "3a4d64e6-8f6f-4506-837e-ba75e92e6d39",
@@ -74,12 +74,12 @@
             "height": 272,
             "width": 234
           },
-          "zIndex": 10
+          "zIndex": 8
         },
         {
           "location": {
-            "x": 620.18229907657542,
-            "y": 72.299396283922391
+            "x": 574.173592350443,
+            "y": 60.797219602389291
           },
           "nodeIndex": "Survey",
           "nodeLineageTag": "04f677be-f854-486a-9b8e-cb1cc59f05d5",
@@ -87,12 +87,12 @@
             "height": 128,
             "width": 234
           },
-          "zIndex": 6
+          "zIndex": 10
         },
         {
           "location": {
-            "x": 649.68182803949446,
-            "y": 231.76118912884778
+            "x": 574.09609556084831,
+            "y": 225.18851673940028
           },
           "nodeIndex": "NPS Dim",
           "nodeLineageTag": "4fa75d73-13ed-41e8-b017-262594947edd",
@@ -114,7 +114,7 @@
             "height": 104,
             "width": 234
           },
-          "zIndex": 7,
+          "zIndex": 6,
           "expandedHeight": 300
         },
         {
@@ -128,12 +128,12 @@
             "height": 104,
             "width": 234
           },
-          "zIndex": 8,
+          "zIndex": 7,
           "expandedHeight": 295.0704957079144
         },
         {
           "location": {
-            "x": 1689.6,
+            "x": 0,
             "y": 0
           },
           "nodeIndex": "Pyxis Field Parameter",
